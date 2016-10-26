@@ -65,7 +65,7 @@ class HotplateSpider(object):
     def crawl_hot_concept_plate_data(self):
         name_url_dict = dict()
         br = self.init_browser()
-        res = br.open('http://q.10jqka.com.cn/stock/gn/')
+        res = br.open('http://q.10jqka.com.cn/stock/gn')
         concept_data = res.read().decode('gbk')
         br.close()
         soup = BeautifulSoup(concept_data)
@@ -278,7 +278,7 @@ if __name__ == '__main__':
                 final_stock_dict,
                 final_stock_profitAndloss)
             print final_hot_stock_contnet
-            send_mail(mailto_list,  u'热点自选股', final_hot_stock_contnet)
+            #send_mail(mailto_list,  u'热点自选股', final_hot_stock_contnet)
             break
         except Exception, e:
             print 'except'

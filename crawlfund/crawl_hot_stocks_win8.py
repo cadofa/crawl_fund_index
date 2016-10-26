@@ -45,7 +45,7 @@ class HotplateSpider(object):
 
     def crawl_hot_concept_plate_data(self):
         name_url_dict = dict()
-        res = requests.get('http://q.10jqka.com.cn/stock/gn/')
+        res = requests.get('http://q.10jqka.com.cn/stock/gn')
         concept_data = res.content.decode('gbk')
         soup = BeautifulSoup(concept_data)
         detail_item = soup.find('table', class_="m_table").findAll('tr')
