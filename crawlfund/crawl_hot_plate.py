@@ -62,7 +62,7 @@ class HotplateSpider(object):
 
     def crawl_hot_concept_plate_data(self):
         br = self.init_browser()
-        res = br.open('http://q.10jqka.com.cn/stock/gn/')
+        res = br.open('http://q.10jqka.com.cn/stock/gn')
         concept_data = res.read().decode('gbk')
         soup = BeautifulSoup(concept_data)
         detail_item = soup.find('table', class_="m_table").findAll('tr')
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
             hot_plate_content = create_hot_plate_content(hot_plate_dict)
             print hot_plate_content.encode('utf8')
-            send_mail(mailto_list,  u'热点板块', hot_plate_content)
+            #send_mail(mailto_list,  u'热点板块', hot_plate_content)
             break
         except Exception, e:
             print e

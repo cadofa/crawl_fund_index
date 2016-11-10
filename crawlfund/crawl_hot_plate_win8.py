@@ -42,7 +42,7 @@ def send_mail(to_list, sub, content, mail_pass):
 class HotplateSpider(object):
 
     def crawl_hot_concept_plate_data(self):
-        res = requests.get('http://q.10jqka.com.cn/stock/gn/')
+        res = requests.get('http://q.10jqka.com.cn/stock/gn')
         concept_data = res.content.decode('gbk')
         soup = BeautifulSoup(concept_data)
         detail_item = soup.find('table', class_="m_table").findAll('tr')
@@ -121,7 +121,7 @@ if __name__ == '__main__':
             hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
             hot_plate_content = create_hot_plate_content(hot_plate_dict)
             print hot_plate_content.encode('utf8')
-            send_mail(mailto_list,  u'热点板块', hot_plate_content, mail_pass)
+            #send_mail(mailto_list,  u'热点板块', hot_plate_content, mail_pass)
             break
         except Exception, e:
             print e
