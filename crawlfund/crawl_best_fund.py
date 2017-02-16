@@ -35,6 +35,7 @@ def craw_data(url):
     rs = requests.get(url)
     pattern = r'code":"(\d{6})'
     fund_code_list = re.findall(pattern, rs.content)
+    print fund_code_list
     return fund_code_list
 
 
@@ -117,5 +118,5 @@ if __name__ == '__main__':
         fund_data = crawl_fund_ranking(fund_code_list, carwl_num)
         mail_content = create_mail_content(fund_data, type_name)
         print mail_content
-        send_mail(mailto_list,
-                  type_name + 'Best Fund', mail_content, mail_pass)
+        #send_mail(mailto_list,
+        #          type_name + 'Best Fund', mail_content, mail_pass)
