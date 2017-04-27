@@ -42,31 +42,30 @@ def send_mail(to_list, sub, content, mail_pass):
 class HotplateSpider(object):
 
     def crawl_hot_concept_plate_data(self):
-        res = requests.get('http://q.10jqka.com.cn/stock/gn')
+        res = requests.get('http://q.10jqka.com.cn/gn/')
         concept_data = res.content.decode('gbk')
         soup = BeautifulSoup(concept_data)
-        detail_item = soup.find('table', class_="m_table").findAll('tr')
+        detail_item = soup.find('input', {'id': 'gnSection'}).get('value')
+        detail_item = json.loads(detail_item)
         detail_item_list = list()
-        for d in detail_item[1:]:
-            item = d.findAll('td')
-            detail_item_list.append((item[1].text,
-                                     float(item[4].text.replace('%', '')),
-                                     float(item[7].text)))
-        detail_item_list.sort(key=lambda item: item[1], reverse=True)
-        concept_zf_top10 = detail_item_list[:10]
+        for k, v in detail_item.items():
+            detail_item_list.append((v['platename'], v['zjjlr'], v['199112']))
         detail_item_list.sort(key=lambda item: item[2], reverse=True)
+        concept_zf_top10 = detail_item_list[:10]
+        detail_item_list.sort(key=lambda item: item[1], reverse=True)
         concept_jlr_top10 = detail_item_list[:10]
         return concept_zf_top10, concept_jlr_top10
 
     def crawl_hot_plate_data(self, url_dict):
         res_dict = dict()
         for k, url in url_dict.items():
-            res = requests.get(url)
             res_dict[k] = list()
-            for r in json.loads(res.content)['data'][:10]:
-                # platename = r['platename']
-                res_dict[k].append(r['platename'])
-
+            res = requests.get(url)
+            soup = BeautifulSoup(res.content.decode('gbk'))
+            tr_list = soup.find_all('tr')[1:]
+            for i in tr_list[:10]:
+                platename = i.find_all('td')[1].text
+                res_dict[k].append(platename)
         (concept_zf_top10,
          concept_jlr_top10) = self.crawl_hot_concept_plate_data()
         res_dict[u'概 念 板块涨幅前十'] = [c[0] for c in concept_zf_top10]
@@ -88,41 +87,24 @@ def create_hot_plate_content(hot_plate_dict):
     hot_plate_concept = ''
     for k, v in hot_plate_dict.items():
         if k == u'热点行业板块':
-            hot_plate_industry = k + '     ' + '   $   '.join(v)
+            hot_plate_industry = k + '  $  ' + '   $   '.join(v)
             continue
         if k == u'热点概念板块':
-            hot_plate_concept = k + '     ' + '   $   '.join(v)
+            hot_plate_concept = k + '  $  ' + '   $   '.join(v)
             continue
-        hot_plate_content.append(k + '     ' + '   $   '.join(v))
+        hot_plate_content.append(k + '  $  ' + '   $   '.join(v))
     hot_plate_content.append(hot_plate_industry)
     hot_plate_content.append(hot_plate_concept)
     return '<br><br>'.join(hot_plate_content)
 
 
 if __name__ == '__main__':
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("mail_pass")
-    #args = parser.parse_args()
-    #mail_pass = args.mail_pass
-    while True:
-        try:
-            hotplatespider = HotplateSpider()
-            url_dict = {
-                u'同花顺行业涨幅前十':
-                ('http://q.10jqka.com.cn/interface/'
-                 'stock/thshy/zdf/desc/1/quote/quote'),
-                u'行业资金净流入前十':
-                ('http://q.10jqka.com.cn/interface/'
-                 'stock/thshy/jlr/desc/1/quote/quote')}
-            # u'概 念 板块涨幅前十':
-            # 'http://q.10jqka.com.cn/interface/stock/gn/zdf/desc/1/quote/quote',
-            # u'概念资金净流入前十':
-            # 'http://q.10jqka.com.cn/interface/stock/gn/jlr/desc/1/quote/quote'}
-            hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
-            hot_plate_content = create_hot_plate_content(hot_plate_dict)
-            print hot_plate_content.encode('utf8')
-            #send_mail(mailto_list,  u'热点板块', hot_plate_content, mail_pass)
-            break
-        except Exception, e:
-            print e
-            time.sleep(18)
+    hotplatespider = HotplateSpider()
+    url_dict = {
+        u'同花顺行业涨幅前十':
+        ('http://q.10jqka.com.cn/thshy/index/field/199112/order/desc/page/1/ajax/1/'),
+        u'行业资金净流入前十':
+        ('http://q.10jqka.com.cn/thshy/index/field/zjjlr/order/desc/page/1/ajax/1/')}
+    hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
+    hot_plate_content = create_hot_plate_content(hot_plate_dict)
+    print hot_plate_content.encode('utf8')

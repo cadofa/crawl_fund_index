@@ -39,16 +39,14 @@ class Clawl_hot_stock_Handler(tornado.web.RequestHandler):
 @url_prefix(r"/plate")
 class Clawl_hot_plate_Handler(tornado.web.RequestHandler):
     def get(self):
-        hotplatespider = HotplateSpider()
-        url_dict = {
-            u'同花顺行业涨幅前十':
-            ('http://q.10jqka.com.cn/interface/'
-             'stock/thshy/zdf/desc/1/quote/quote'),
-            u'行业资金净流入前十':
-            ('http://q.10jqka.com.cn/interface/'
-             'stock/thshy/jlr/desc/1/quote/quote')}
-        hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
-        hot_plate_content = create_hot_plate_content(hot_plate_dict)
+    	hotplatespider = HotplateSpider()
+    	url_dict = {
+        	u'同花顺行业涨幅前十':
+        	('http://q.10jqka.com.cn/thshy/index/field/199112/order/desc/page/1/ajax/1/'),
+        	u'行业资金净流入前十':
+        	('http://q.10jqka.com.cn/thshy/index/field/zjjlr/order/desc/page/1/ajax/1/')}
+    	hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
+    	hot_plate_content = create_hot_plate_content(hot_plate_dict)
         self.write(hot_plate_content.encode('utf8'))
 
 
