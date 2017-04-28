@@ -35,7 +35,7 @@ def craw_data(url):
     rs = requests.get(url)
     pattern = r'code":"(\d{6})'
     fund_code_list = re.findall(pattern, rs.content)
-    print fund_code_list
+    #print fund_code_list
     return fund_code_list
 
 
@@ -91,11 +91,11 @@ if __name__ == '__main__':
     parser.add_argument("type",
                         choices=['mixed', 'stock', 'bond', 'guaranteed'])
     parser.add_argument("carwl_num", choices=['288', '588', '688'])
-    parser.add_argument("mail_pass")
+    #parser.add_argument("mail_pass")
     args = parser.parse_args()
     type_ = args.type
     carwl_num = int(args.carwl_num)
-    mail_pass = args.mail_pass
+    #mail_pass = args.mail_pass
     if type_:
         if type_ == 'mixed':
             type_name = u'混合型'
