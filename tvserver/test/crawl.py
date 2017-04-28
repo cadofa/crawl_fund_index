@@ -17,22 +17,16 @@ url_pattern = url_pattern
 class Clawl_hot_stock_Handler(tornado.web.RequestHandler):
     def get(self):
         hotplatespider = HotstockSpider()
-        hot_plate, name_url_dict = hotplatespider.crawl_hot_plate_data()
-
-        hot_stocks_dict = hotplatespider.crawl_hot_stock_data(
-            hot_plate, name_url_dict)
-
+        hot_plate_concept = hotplatespider.crawl_hot_plate_data()
+        hot_stocks_dict = hotplatespider.crawl_hot_stock_data(hot_plate_concept)
         (increase_stocks, fall_stocks,
          amplitude_stocks, LB_stocks,
          HS_stocks) = hotplatespider.crawl_five_unusual_plate_stocks()
-
         final_stock_dict = hotplatespider.select_hot_stocks(
             hot_stocks_dict, increase_stocks,
             fall_stocks, amplitude_stocks, LB_stocks, HS_stocks)
-
         final_hot_stock_contnet = create_hot_stock_content(
-            hot_stocks_dict,
-            final_stock_dict)
+            hot_stocks_dict,final_stock_dict)
         self.write(final_hot_stock_contnet)
 
 

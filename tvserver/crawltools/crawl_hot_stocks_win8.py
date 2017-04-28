@@ -44,43 +44,35 @@ def send_mail(to_list, sub, content, mail_pass):
 class HotstockSpider(object):
 
     def crawl_hot_concept_plate_data(self):
-        name_url_dict = dict()
-        res = requests.get('http://q.10jqka.com.cn/stock/gn')
+        res = requests.get('http://q.10jqka.com.cn/gn/')
         concept_data = res.content.decode('gbk')
         soup = BeautifulSoup(concept_data)
-        detail_item = soup.find('table', class_="m_table").findAll('tr')
+        detail_item = soup.find('input', {'id': 'gnSection'}).get('value')
+        detail_item = json.loads(detail_item)
         detail_item_list = list()
-        for d in detail_item[1:]:
-            item = d.findAll('td')
-            name_url_dict[item[1].text] = item[1].a['href']
-            detail_item_list.append((item[1].text, float(
-                item[4].text.replace('%', '')), float(item[7].text)))
-        detail_item_list.sort(key=lambda item: item[1], reverse=True)
-        concept_zf_top10 = detail_item_list[:10]
+        for k, v in detail_item.items():
+            detail_item_list.append((v['platename'], v['zjjlr'], v['199112'], v['cid']))
         detail_item_list.sort(key=lambda item: item[2], reverse=True)
+        concept_zf_top10 = detail_item_list[:10]
+        detail_item_list.sort(key=lambda item: item[1], reverse=True)
         concept_jlr_top10 = detail_item_list[:10]
-        return concept_zf_top10, concept_jlr_top10, name_url_dict
+        return concept_zf_top10, concept_jlr_top10
 
     def crawl_hot_plate_data(self):
-        res_dict = dict()
         (concept_zf_top10,
-         concept_jlr_top10,
-         name_url_dict) = self.crawl_hot_concept_plate_data()
-        res_dict[u'概 念 板块涨幅前十'] = [c[0] for c in concept_zf_top10]
-        res_dict[u'概念资金净流入前十'] = [c[0] for c in concept_jlr_top10]
-        hot_plate_concept = list(set(
-            res_dict[u'概 念 板块涨幅前十']).intersection(
-                set(res_dict[u'概念资金净流入前十'])))
-        return hot_plate_concept, name_url_dict
+         concept_jlr_top10) = self.crawl_hot_concept_plate_data()
+        hot_plate_concept = list(set(concept_zf_top10).intersection(set(concept_jlr_top10)))
+        return hot_plate_concept
 
-    def crawl_hot_stock_data(self, hot_plate, name_url_dict):
-        hot_stock_url_list = [name_url_dict[h] for h in hot_plate]
+    def crawl_hot_stock_data(self, hot_plate_concept):
+        url_template = "http://q.10jqka.com.cn/gn/detail/field/199112/order/desc/page/1/ajax/1/code/%s"
+        hot_stock_url_list = [url_template%h[3] for h in hot_plate_concept]
         hot_stocks_dict = dict()
         for u in hot_stock_url_list:
             res = requests.get(u)
             html_data = res.content.decode('gbk')
             soup = BeautifulSoup(html_data)
-            detail_item = soup.find('table', class_="m_table").findAll('tr')
+            detail_item = soup.find('table', class_="m-table m-pager-table").findAll('tr')
             for d in detail_item[1:]:
                 item = d.findAll('td')
                 hot_stocks_dict[item[1].text] = item[2].text
@@ -225,39 +217,23 @@ def create_hot_stock_content(hot_stocks_dict,
     for k, v in final_stock_items:
         profitAndloss = final_stock_profitAndloss.get(k, '')
         profitAndloss = profitAndloss*100 if profitAndloss else float(0)
-        hot_stocks_content_list.append('%s   %s   %.f%s' %
+        hot_stocks_content_list.append('%s  &nbsp;&nbsp;&nbsp;&nbsp; %s &nbsp;&nbsp;&nbsp;&nbsp; %.f%s' %
                                        (str(k),
                                         str(hot_stocks_dict[k].encode('utf8')),
                                         float(v)/5*100, '%',))
     #return '\r\n\r\n'.join(hot_stocks_content_list)
     return '<br><br>'.join(hot_stocks_content_list)
 if __name__ == '__main__':
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("mail_pass")
-    #args = parser.parse_args()
-    #mail_pass = args.mail_pass
-    while True:
-        try:
-            hotplatespider = HotstockSpider()
-            hot_plate, name_url_dict = hotplatespider.crawl_hot_plate_data()
-            hot_stocks_dict = hotplatespider.crawl_hot_stock_data(
-                hot_plate, name_url_dict)
-            (increase_stocks, fall_stocks,
-             amplitude_stocks, LB_stocks,
-             HS_stocks) = hotplatespider.crawl_five_unusual_plate_stocks()
-            final_stock_dict = hotplatespider.select_hot_stocks(
-                hot_stocks_dict, increase_stocks,
-                fall_stocks, amplitude_stocks, LB_stocks, HS_stocks)
-            #final_stock_profitAndloss = (
-            #    hotplatespider.cal_hot_stocks_profitAndloss(final_stock_dict))
-            final_hot_stock_contnet = create_hot_stock_content(
-                hot_stocks_dict,
-                final_stock_dict)
-            print final_hot_stock_contnet.decode('utf8')
-            # send_mail(mailto_list,  u'热点自选股',
-            #          final_hot_stock_contnet, mail_pass)
-            break
-        except Exception, e:
-            print 'except'
-            traceback.print_exc()
-            time.sleep(1)
+    hotplatespider = HotstockSpider()
+    hot_plate_concept = hotplatespider.crawl_hot_plate_data()
+    hot_stocks_dict = hotplatespider.crawl_hot_stock_data(hot_plate_concept)
+    (increase_stocks, fall_stocks,
+     amplitude_stocks, LB_stocks,
+     HS_stocks) = hotplatespider.crawl_five_unusual_plate_stocks()
+    final_stock_dict = hotplatespider.select_hot_stocks(
+        hot_stocks_dict, increase_stocks,
+        fall_stocks, amplitude_stocks, LB_stocks, HS_stocks)
+    final_hot_stock_contnet = create_hot_stock_content(
+        hot_stocks_dict,
+        final_stock_dict)
+    print final_hot_stock_contnet.decode('utf8')
