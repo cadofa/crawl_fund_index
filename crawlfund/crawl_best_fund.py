@@ -52,10 +52,16 @@ def crawl_fund_ranking(fund_code_list, carwl_num):
                                          class_='even')[-1].find_all('td')
         ranking_list = []
         for t in tr[1:-1]:
-            ranking_list.append(int(t.text.split('/')[0]))
-        average = int(round(numpy.mean(ranking_list)))
-        variance = int(round(numpy.var(ranking_list)))
-        fund_data.append([name, average, variance])
+            try:
+                ranking_list.append(int(t.text.split('/')[0]))
+            except ValueError:
+                pass
+        if len(ranking_list)>1:
+            average = int(round(numpy.mean(ranking_list)))
+            variance = int(round(numpy.var(ranking_list)))
+            fund_data.append([name, average, variance])
+        else:
+            pass
     return fund_data
 
 
