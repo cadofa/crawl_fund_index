@@ -31,18 +31,21 @@ def send_mail(to_list, sub, content, mail_pass):
         return False
 
 
-def craw_data(url):
+def crawl_data(url):
     rs = requests.get(url)
     pattern = r'code":"(\d{6})'
     fund_code_list = re.findall(pattern, rs.content)
-    #print fund_code_list
+    print len(fund_code_list)
     return fund_code_list
 
 
-def crawl_fund_ranking(fund_code_list, carwl_num):
+def crawl_fund_ranking(fund_code_list, crawl_num):
     url_format = 'http://fund.10jqka.com.cn/{}/'
     fund_data = list()
-    for f in fund_code_list[:carwl_num]:
+    count = 0
+    for f in fund_code_list[:crawl_num]:
+        count += 1
+        print count,'   ',url_format.format(f)
         rs = requests.get(url_format.format(f))
         soup = BeautifulSoup(rs.content.decode('gbk', 'ignore'))
         name = soup.find('h2', class_='fl').find('a').get_text()
@@ -96,11 +99,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("type",
                         choices=['mixed', 'stock', 'bond', 'guaranteed'])
-    parser.add_argument("carwl_num", choices=['288', '588', '688'])
+    parser.add_argument("crawl_num", choices=['288', '588', '688', '888'])
     #parser.add_argument("mail_pass")
     args = parser.parse_args()
     type_ = args.type
-    carwl_num = int(args.carwl_num)
+    crawl_num = int(args.crawl_num)
     #mail_pass = args.mail_pass
     if type_:
         if type_ == 'mixed':
@@ -117,11 +120,10 @@ if __name__ == '__main__':
                    'zqx_F008_desc_0_0_1_9999_0_0_0_jsonp_g.html')
         if type_ == 'guaranteed':
             type_name = u'保本型'
-            carwl_num = 88
             url = ('http://fund.ijijin.cn/data/Net/info/'
                    'bbx_F008_desc_0_0_1_9999_0_0_0_jsonp_g.html')
-        fund_code_list = craw_data(url)
-        fund_data = crawl_fund_ranking(fund_code_list, carwl_num)
+        fund_code_list = crawl_data(url)
+        fund_data = crawl_fund_ranking(fund_code_list, crawl_num)
         mail_content = create_mail_content(fund_data, type_name)
         print mail_content
         #send_mail(mailto_list,
