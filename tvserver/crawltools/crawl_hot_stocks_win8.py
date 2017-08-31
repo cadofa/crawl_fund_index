@@ -203,6 +203,14 @@ class HotstockSpider(object):
                 final_stock_dict[s] = final_stock_dict.get(s, 0) + 1
         return final_stock_dict
 
+def crawl_doctor_stock(stock_code):
+    template = "http://doctor.10jqka.com.cn/%s/"
+    res = requests.get(template % stock_code)
+    content = res.content.decode('gbk')
+    soup = BeautifulSoup(content)
+    conclusion = soup.findAll("div", {"class": "stocktotal"})[0].contents[0]
+    return conclusion.encode("utf8")
+
 
 def create_hot_stock_content(hot_stocks_dict,
                              final_stock_dict,
@@ -217,10 +225,17 @@ def create_hot_stock_content(hot_stocks_dict,
     for k, v in final_stock_items:
         profitAndloss = final_stock_profitAndloss.get(k, '')
         profitAndloss = profitAndloss*100 if profitAndloss else float(0)
-        hot_stocks_content_list.append('%s  &nbsp;&nbsp;&nbsp;&nbsp; %s &nbsp;&nbsp;&nbsp;&nbsp; %.f%s' %
+        template= "<a href='http://doctor.10jqka.com.cn/%s/' target='view_window'>%s</a>"
+        link_url = template % (str(k),
+                                        str(hot_stocks_dict[k].encode('utf8')))
+        hot_stocks_content_list.append('%s  &nbsp;&nbsp;&nbsp;&nbsp; '
+                                       '%s &nbsp;&nbsp;&nbsp;&nbsp; %.f'
+                                       '%s &nbsp;&nbsp;&nbsp;&nbsp; %s'
+                                       '&nbsp;&nbsp;&nbsp;&nbsp; %s' %
                                        (str(k),
                                         str(hot_stocks_dict[k].encode('utf8')),
-                                        float(v)/5*100, '%',))
+                                        float(v)/5*100, '%', crawl_doctor_stock(k),
+                                        link_url))
     #return '\r\n\r\n'.join(hot_stocks_content_list)
     return '<br><br>'.join(hot_stocks_content_list)
 if __name__ == '__main__':
