@@ -48,7 +48,10 @@ def crawl_fund_ranking(fund_code_list, crawl_num):
         print count,'   ',url_format.format(f)
         rs = requests.get(url_format.format(f))
         soup = BeautifulSoup(rs.content.decode('gbk', 'ignore'))
-        name = soup.find('h2', class_='fl').find('a').get_text()
+        try:
+            name = soup.find('h2', class_='fl').find('a').get_text()
+        except AttributeError:
+            continue
         tr = soup.find('div',
                        class_='sub_wraper_1 cb mt20').find(
                        'table').find_all('tr',
