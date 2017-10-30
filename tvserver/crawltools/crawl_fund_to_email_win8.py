@@ -163,7 +163,7 @@ def create_mail_content(fund, index, pos):
             pos_content_list.append('%s: %.2f%s' % (d.replace('-', ''),
                                                     v * 100, '%'))
     pos_content = '仓位变化    ' + '   $   '.join(pos_content_list)
-    return '\r\n\r\n'.join([fund_content, index_content, pos_content])
+    return '<br><br>'.join([fund_content, index_content, pos_content])
 
 if __name__ == '__main__':
     while True:
