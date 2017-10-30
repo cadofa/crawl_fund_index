@@ -12,7 +12,6 @@ import datetime
 import smtplib
 import requests
 import time
-import argparse
 from email.mime.text import MIMEText
 from email.header import Header
 from bs4 import BeautifulSoup
@@ -45,11 +44,9 @@ class FundSpider(object):
     def crawl_fund_data(self, url):
         res = requests.get(url)
         soup = BeautifulSoup(res.content)
-        netvalue_list = soup.find_all('tr')[1:7]
-        date_increase = [i.find_all('td') for i in netvalue_list]
-        date_increase_tuple = [(i[0].text,
-                                float(i[4].text.replace('%', '')))
-                               for i in date_increase]
+        netvalue_list = soup.find('script', type="text/javascript").text[16:-2]
+        netvalue_list = eval(netvalue_list)
+        date_increase_tuple = [(i['date'], float(i['rate'])) for i in netvalue_list[:6]]
         date_increase_dict = dict(date_increase_tuple)
         return date_increase_dict
 
@@ -166,13 +163,9 @@ def create_mail_content(fund, index, pos):
             pos_content_list.append('%s: %.2f%s' % (d.replace('-', ''),
                                                     v * 100, '%'))
     pos_content = '仓位变化    ' + '   $   '.join(pos_content_list)
-    return '<br><br>'.join([fund_content, index_content, pos_content])
+    return '\r\n\r\n'.join([fund_content, index_content, pos_content])
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("mail_pass")
-    args = parser.parse_args()
-    mail_pass = args.mail_pass
     while True:
         try:
             fundspider = FundSpider()
@@ -184,7 +177,6 @@ if __name__ == '__main__':
             index.sort()
             mail_content = create_mail_content(fund, index, pos)
             print mail_content
-            send_mail(mailto_list, subject, mail_content, mail_pass)
             break
         except Exception, e:
             print e
