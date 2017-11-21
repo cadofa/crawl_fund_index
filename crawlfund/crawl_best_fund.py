@@ -10,6 +10,7 @@ from email.header import Header
 from bs4 import BeautifulSoup
 
 code_name_list = ['F003N_FUND33', 'F008', 'F009', 'F011', 'F015N_FUND33', 'F012']
+weights_list =   [ 1,              0.9,    0.8,    0.7,    0.6,            0.5]
 
 def sort_dict(response_dict, key_to_sort):
     sorted_dict= sorted(response_dict.items(), key=lambda d:d[1][key_to_sort], reverse = True)
@@ -64,6 +65,7 @@ def Computing_rankings(response_dict):
     for k, v in response_dict.items():
         try:
             ranking_list = [int(v[c]) for c in code_name_list]
+            ranking_list = [r*w for r, w in zip(ranking_list, weights_list)]
         except ValueError:
             continue
         average = int(round(numpy.mean(ranking_list)))
@@ -78,7 +80,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[1])
     best_average_fund_set = set()
     content_list = list()
-    for f in fund_data[:88]:
+    for f in fund_data[:38]:
         content_list.append(f[0])
         best_average_fund_set.add(f[0])
     average_content = average_content_title + '\n'.join(content_list)
@@ -87,7 +89,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[2])
     best_variance_fund_set = set()
     content_list = list()
-    for f in fund_data[:88]:
+    for f in fund_data[:38]:
         content_list.append(f[0])
         best_variance_fund_set.add(f[0])
     variance_content = variance_content_title + '\n'.join(content_list)
