@@ -108,12 +108,12 @@ class FundSpider(object):
             "http://quotes.money.163.com/trade/lsjysj_zhishu_399905.html")
         avg_index_i = dict(
             [(k,
-              (shanghai_index_increase[k] +
-               shenzhen_index_increase[k] +
-               hs300_index_increase[k] +
-               zhongxiao_index_increase[k] +
-               chuangye_index_increase[k] +
-               zz500_index_increase[k])/6)
+              (shanghai_index_increase.get(k, 0) +
+               shenzhen_index_increase.get(k, 0) +
+               hs300_index_increase.get(k, 0) +
+               zhongxiao_index_increase.get(k, 0) +
+               chuangye_index_increase.get(k, 0) +
+               zz500_index_increase.get(k, 0))/6)
                 for k in shanghai_index_increase])
         avg_fund_netvalue_i = dict(
             [(k.replace('-', ''), avg_fund_netvalue_i[k])
