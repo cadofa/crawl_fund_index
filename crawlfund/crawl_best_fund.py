@@ -2,72 +2,74 @@
 import re
 import smtplib
 import requests
+import json
 import argparse
 import numpy
 from email.mime.text import MIMEText
 from email.header import Header
 from bs4 import BeautifulSoup
 
+code_name_list = ['F003N_FUND33', 'F008', 'F009', 'F011', 'F015N_FUND33', 'F012']
 
-mailto_list = ['cadofa@163.com']
-mail_host = "smtp.163.com"
-mail_user = 'cadofa@163.com'
+def sort_dict(response_dict, key_to_sort):
+    sorted_dict= sorted(response_dict.items(), key=lambda d:d[1][key_to_sort], reverse = True)
+    rank = 1
+    for s in sorted_dict:
+        try:
+            float(s[1][key_to_sort])
+            response_dict[s[0]][key_to_sort] = rank
+            rank += 1
+        except ValueError:
+            continue
+
+    return response_dict
 
 
-def send_mail(to_list, sub, content, mail_pass):
-    msg = MIMEText(content, 'plain', 'utf-8')
-    msg['Subject'] = Header(sub, 'utf-8')
-    msg['From'] = mail_user
-    msg['To'] = ";".join(to_list)
-    try:
-        server = smtplib.SMTP()
-        server.connect(mail_host, '25')
-        server.login(mail_user, mail_pass)
-        server.sendmail(mail_user, to_list, msg.as_string())
-        server.close()
-        return True
-    except Exception as e:
-        print(e)
-        return False
+def handle_fund_name(response_dict):
+    for s in response_dict:
+        ss = response_dict[s]['name'].encode('utf8')
+        x = json.loads('{"foo":"%s"}' % ss)
+        response_dict[s]['name'] = x['foo']
 
+    return response_dict
 
 def crawl_data(url):
+    global code_name_list
+
     rs = requests.get(url)
-    pattern = r'code":"(\d{6})'
-    fund_code_list = re.findall(pattern, rs.content)
-    print len(fund_code_list)
-    return fund_code_list
-
-
-def crawl_fund_ranking(fund_code_list, crawl_num):
-    url_format = 'http://fund.10jqka.com.cn/{}/'
-    fund_data = list()
-    count = 0
-    for f in fund_code_list[:crawl_num]:
-        count += 1
-        print count,'   ',url_format.format(f)
-        rs = requests.get(url_format.format(f))
-        soup = BeautifulSoup(rs.content.decode('gbk', 'ignore'))
-        try:
-            name = soup.find('h2', class_='fl').find('a').get_text()
-        except AttributeError:
-            continue
-        tr = soup.find('div',
-                       class_='sub_wraper_1 cb mt20').find(
-                       'table').find_all('tr',
-                                         class_='even')[-1].find_all('td')
-        ranking_list = []
-        for t in tr[1:-1]:
+    print "***************fund text******************"
+    response_str = rs.text[2:-1].replace("null", "'null'")
+    response_dict = eval("{}".format(response_str))
+    response_dict = response_dict['data']['data']
+    for k, v in response_dict.items():
+        for key, value in v.items():
+            if key == "code":
+                continue
             try:
-                ranking_list.append(int(t.text.split('/')[0]))
+                v[key] = float(value)
             except ValueError:
-                pass
-        if len(ranking_list)>1:
-            average = int(round(numpy.mean(ranking_list)))
-            variance = int(round(numpy.var(ranking_list)))
-            fund_data.append([name, average, variance])
-        else:
-            pass
+                continue
+
+
+    response_dict = handle_fund_name(response_dict)
+    for k in code_name_list:
+        response_dict = sort_dict(response_dict, k)
+
+    return response_dict
+
+
+def Computing_rankings(response_dict):
+    global code_name_list
+    fund_data = list()
+    for k, v in response_dict.items():
+        try:
+            ranking_list = [int(v[c]) for c in code_name_list]
+        except ValueError:
+            continue
+        average = int(round(numpy.mean(ranking_list)))
+        variance = int(round(numpy.var(ranking_list)))
+        fund_data.append([v['code'] + "  " + v['name'], average, variance])
+
     return fund_data
 
 
@@ -76,7 +78,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[1])
     best_average_fund_set = set()
     content_list = list()
-    for f in fund_data[:18]:
+    for f in fund_data[:88]:
         content_list.append(f[0])
         best_average_fund_set.add(f[0])
     average_content = average_content_title + '\n'.join(content_list)
@@ -85,7 +87,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[2])
     best_variance_fund_set = set()
     content_list = list()
-    for f in fund_data[:18]:
+    for f in fund_data[:88]:
         content_list.append(f[0])
         best_variance_fund_set.add(f[0])
     variance_content = variance_content_title + '\n'.join(content_list)
@@ -102,12 +104,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("type",
                         choices=['mixed', 'stock', 'bond', 'guaranteed'])
-    parser.add_argument("crawl_num", choices=['288', '588', '688', '888'])
-    #parser.add_argument("mail_pass")
     args = parser.parse_args()
     type_ = args.type
-    crawl_num = int(args.crawl_num)
-    #mail_pass = args.mail_pass
     if type_:
         if type_ == 'mixed':
             type_name = u'混合型'
@@ -125,9 +123,8 @@ if __name__ == '__main__':
             type_name = u'保本型'
             url = ('http://fund.ijijin.cn/data/Net/info/'
                    'bbx_F008_desc_0_0_1_9999_0_0_0_jsonp_g.html')
-        fund_code_list = crawl_data(url)
-        fund_data = crawl_fund_ranking(fund_code_list, crawl_num)
+        response_dict = crawl_data(url)
+        fund_data = Computing_rankings(response_dict)
         mail_content = create_mail_content(fund_data, type_name)
         print mail_content
-        #send_mail(mailto_list,
-        #          type_name + 'Best Fund', mail_content, mail_pass)
+
