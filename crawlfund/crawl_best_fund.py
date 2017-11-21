@@ -74,7 +74,7 @@ def Computing_rankings(response_dict):
 
 
 def create_mail_content(fund_data, type_name):
-    average_content_title = type_name + u'排名前十八:\n'
+    average_content_title = type_name + u'排名靠前基金:\n'
     fund_data.sort(key=lambda x: x[1])
     best_average_fund_set = set()
     content_list = list()
@@ -83,7 +83,7 @@ def create_mail_content(fund_data, type_name):
         best_average_fund_set.add(f[0])
     average_content = average_content_title + '\n'.join(content_list)
 
-    variance_content_title = type_name + u'方差前十八:\n'
+    variance_content_title = type_name + u'方差靠前基金:\n'
     fund_data.sort(key=lambda x: x[2])
     best_variance_fund_set = set()
     content_list = list()
