@@ -13,38 +13,18 @@ import requests
 import argparse
 import json
 import time
-from email.mime.text import MIMEText
-from email.header import Header
+from selenium import webdriver
 from bs4 import BeautifulSoup
-
-mailto_list = ['cadofa@163.com']
-mail_host = "smtp.163.com"
-mail_user = 'cadofa@163.com'
-
-
-def send_mail(to_list, sub, content, mail_pass):
-    msg = MIMEText(content, 'plain', 'utf-8')
-    msg['Subject'] = Header(sub, 'utf-8')
-    msg['From'] = mail_user
-    msg['To'] = ";".join(to_list)
-    try:
-        server = smtplib.SMTP()
-        server.connect(mail_host, '25')
-        server.login(mail_user, mail_pass)
-        server.sendmail(mail_user, to_list, msg.as_string())
-        server.close()
-        return True
-    except Exception as e:
-        print(e)
-        return False
 
 
 class HotplateSpider(object):
 
+    def __init__(self):
+        self.driver = webdriver.Chrome()
+
     def crawl_hot_concept_plate_data(self):
-        res = requests.get('http://q.10jqka.com.cn/gn/')
-        concept_data = res.content.decode('gbk')
-        soup = BeautifulSoup(concept_data)
+        self.driver.get('http://q.10jqka.com.cn/gn/')
+        soup = BeautifulSoup(self.driver.page_source)
         detail_item = soup.find('input', {'id': 'gnSection'}).get('value')
         detail_item = json.loads(detail_item)
         detail_item_list = list()
@@ -60,8 +40,8 @@ class HotplateSpider(object):
         res_dict = dict()
         for k, url in url_dict.items():
             res_dict[k] = list()
-            res = requests.get(url)
-            soup = BeautifulSoup(res.content.decode('gbk'))
+            self.driver.get(url)
+            soup = BeautifulSoup(self.driver.page_source)
             tr_list = soup.find_all('tr')[1:]
             for i in tr_list[:10]:
                 platename = i.find_all('td')[1].text
@@ -106,5 +86,6 @@ if __name__ == '__main__':
         u'行业资金净流入前十':
         ('http://q.10jqka.com.cn/thshy/index/field/zjjlr/order/desc/page/1/ajax/1/')}
     hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
+    hotplatespider.driver.quit()
     hot_plate_content = create_hot_plate_content(hot_plate_dict)
     print hot_plate_content.encode('utf8')

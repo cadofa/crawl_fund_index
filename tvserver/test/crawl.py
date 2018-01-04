@@ -25,6 +25,7 @@ class Clawl_hot_stock_Handler(tornado.web.RequestHandler):
         final_stock_dict = hotplatespider.select_hot_stocks(
             hot_stocks_dict, increase_stocks,
             fall_stocks, amplitude_stocks, LB_stocks, HS_stocks)
+        hotplatespider.driver.quit()
         final_hot_stock_contnet = create_hot_stock_content(
             hot_stocks_dict,final_stock_dict)
         self.write(final_hot_stock_contnet)
@@ -40,6 +41,7 @@ class Clawl_hot_plate_Handler(tornado.web.RequestHandler):
         	u'行业资金净流入前十':
         	('http://q.10jqka.com.cn/thshy/index/field/zjjlr/order/desc/page/1/ajax/1/')}
     	hot_plate_dict = hotplatespider.crawl_hot_plate_data(url_dict)
+        hotplatespider.driver.quit()
     	hot_plate_content = create_hot_plate_content(hot_plate_dict)
         self.write(hot_plate_content.encode('utf8'))
 
@@ -58,7 +60,7 @@ class Clawl_index_Handler(tornado.web.RequestHandler):
         profitAndloss_content = create_profitAndloss_content(index_profitAndloss)
         ls_trend = indexspider.long_short_trend(source_data_dict)
         ls_trend_content = create_lstrend_content(ls_trend)
-        self.write('<br><br><br>'.join([volume_ratio_mail_content,
+        self.write('<br><br><br><br><br>'.join([volume_ratio_mail_content,
                                         profitAndloss_content,
                                         ls_trend_content]))
 
