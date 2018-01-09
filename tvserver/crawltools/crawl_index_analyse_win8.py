@@ -12,31 +12,7 @@ created on 2015-07-21
 import datetime
 import smtplib
 import requests
-import argparse
-from email.mime.text import MIMEText
-from email.header import Header
 from bs4 import BeautifulSoup
-
-mailto_list = ['cadofa@163.com']
-mail_host = "smtp.163.com"
-mail_user = 'cadofa@163.com'
-
-
-def send_mail(to_list, sub, content, mail_pass):
-    msg = MIMEText(content, 'plain', 'utf-8')
-    msg['Subject'] = Header(sub, 'utf-8')
-    msg['From'] = mail_user
-    msg['To'] = ";".join(to_list)
-    try:
-        server = smtplib.SMTP()
-        server.connect(mail_host, '25')
-        server.login(mail_user, mail_pass)
-        server.sendmail(mail_user, to_list, msg.as_string())
-        server.close()
-        return True
-    except Exception as e:
-        print(e)
-        return False
 
 
 class IndexSpider(object):
@@ -275,10 +251,6 @@ def create_lstrend_content(ls_trend):
     return "<br><br>".join(ls_trend_content)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("mail_pass")
-    args = parser.parse_args()
-    mail_pass = args.mail_pass
     indexspider = IndexSpider()
     source_data_dict = dict()
     for i in ['000001', '399106', '399300', '399101', '399102', '399905']:
@@ -287,12 +259,9 @@ if __name__ == '__main__':
     volume_ratio_data = indexspider.cal_volume_ratio(source_data_dict)
     volume_ratio_mail_content = create_volume_ratio_content(volume_ratio_data)
     # print volume_ratio_mail_content.encode('utf8')
-    send_mail(mailto_list,  u'大盘量比', volume_ratio_mail_content, mail_pass)
     index_profitAndloss = indexspider.index_profitAndloss(source_data_dict)
     profitAndloss_content = create_profitAndloss_content(index_profitAndloss)
     print profitAndloss_content.encode('utf8')
-    send_mail(mailto_list,  u'市场盈亏', profitAndloss_content, mail_pass)
     ls_trend = indexspider.long_short_trend(source_data_dict)
     ls_trend_content = create_lstrend_content(ls_trend)
     # print ls_trend_content.encode('utf8')
-    send_mail(mailto_list,  u'多空对比', ls_trend_content, mail_pass)
