@@ -175,9 +175,12 @@ class StockSpider(object):
 def create_stock_volume_ratio_content(volume_ratio_data, stock_dict):
     volume_ratio_content = list()
     pjlb_content = ''
+    template = "<a href='http://doctor.10jqka.com.cn/%s/' target='view_window'>%s</a>"
     for k, v in volume_ratio_data.items():
         _content = stock_dict[k] + u'量比' + '&nbsp;'*5
         _content += '  $  '.join(['%s: %.2f' % (i, j) for i, j in v])
+        link_url = template % (k, stock_dict[k])
+        _content += '&nbsp;' * 8 + link_url
         volume_ratio_content.append(_content)
     return "<br><br>".join(volume_ratio_content)
 

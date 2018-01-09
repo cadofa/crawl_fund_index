@@ -197,6 +197,7 @@ def crawl_doctor_stock(stock_code):
 def create_hot_stock_content(hot_stocks_dict,
                              final_stock_dict,
                              final_stock_profitAndloss=None):
+    template = "<a href='http://doctor.10jqka.com.cn/%s/' target='view_window'>%s</a>"
     if not final_stock_profitAndloss:
         final_stock_profitAndloss = dict()
     final_stock_items = final_stock_dict.items()
@@ -207,9 +208,7 @@ def create_hot_stock_content(hot_stocks_dict,
     for k, v in final_stock_items:
         profitAndloss = final_stock_profitAndloss.get(k, '')
         profitAndloss = profitAndloss*100 if profitAndloss else float(0)
-        template= "<a href='http://doctor.10jqka.com.cn/%s/' target='view_window'>%s</a>"
-        link_url = template % (str(k),
-                                        str(hot_stocks_dict[k].encode('utf8')))
+        link_url = template % (str(k), str(hot_stocks_dict[k].encode('utf8')))
         hot_stocks_content_list.append('%s  &nbsp;&nbsp;&nbsp;&nbsp; '
                                        '%s &nbsp;&nbsp;&nbsp;&nbsp; %.f'
                                        '%s &nbsp;&nbsp;&nbsp;&nbsp; %s'
