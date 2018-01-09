@@ -9,6 +9,10 @@ from crawltools.crawl_index_analyse_win8 import (IndexSpider,
                                                  create_volume_ratio_content,
                                                  create_profitAndloss_content,
                                                  create_lstrend_content)
+from crawltools.crawl_stock_analyse_win8 import (StockSpider,
+                                                 create_stock_volume_ratio_content,
+                                                 create_stock_profitAndloss_content,
+                                                 create_stock_lstrend_content)
 from crawltools.crawl_fund_to_email_win8 import FundSpider, create_mail_content
 
 url_pattern = url_pattern
@@ -29,6 +33,28 @@ class Clawl_hot_stock_Handler(tornado.web.RequestHandler):
         final_hot_stock_contnet = create_hot_stock_content(
             hot_stocks_dict,final_stock_dict)
         self.write(final_hot_stock_contnet)
+
+
+@url_prefix(r"/stock_analyse")
+class Clawl_stock_analyse_Handler(tornado.web.RequestHandler):
+    def get(self):
+        stocks = self.get_argument('stocks', '')
+        stock_list = stocks.split(',')
+        stock_list = [s.strip() for s in stock_list]
+        stockspider = StockSpider()
+        source_data_dict = dict()
+        for i in stock_list:
+            source_data_dict[i] = stockspider.crawl_stock_data(i,
+                "http://quotes.money.163.com/trade/lsjysj_%s.html" % i)
+        volume_ratio_data = stockspider.cal_volume_ratio(source_data_dict)
+        volume_ratio_mail_content = create_stock_volume_ratio_content(volume_ratio_data, stockspider.stock_dict)
+        stock_profitAndloss = stockspider.stock_profitAndloss(source_data_dict)
+        profitAndloss_content = create_stock_profitAndloss_content(stock_profitAndloss, stockspider.stock_dict)
+        ls_trend = stockspider.long_short_trend(source_data_dict)
+        ls_trend_content = create_stock_lstrend_content(ls_trend, stockspider.stock_dict)
+        self.write('<br><br><br><br>'.join([volume_ratio_mail_content,
+                                                profitAndloss_content,
+                                                ls_trend_content]))
 
 
 @url_prefix(r"/plate")
