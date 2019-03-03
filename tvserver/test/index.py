@@ -1,8 +1,6 @@
 import tornado.web
 
-from utils import url_prefix, url_pattern
-
-url_pattern = url_pattern
+from utils import url_prefix
 
 @url_prefix(r"/testagain")
 class TestHandler(tornado.web.RequestHandler):

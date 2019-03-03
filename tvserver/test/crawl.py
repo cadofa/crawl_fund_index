@@ -2,7 +2,7 @@
 
 import tornado.web
 
-from utils import url_prefix, url_pattern
+from utils import url_prefix
 from crawltools.crawl_hot_stocks_win8 import HotstockSpider, create_hot_stock_content
 from crawltools.crawl_hot_plate_win8 import HotplateSpider, create_hot_plate_content
 from crawltools.crawl_index_analyse_win8 import (IndexSpider,
@@ -14,8 +14,6 @@ from crawltools.crawl_stock_analyse_win8 import (StockSpider,
                                                  create_stock_profitAndloss_content,
                                                  create_stock_lstrend_content)
 from crawltools.crawl_fund_to_email_win8 import FundSpider, create_mail_content
-
-url_pattern = url_pattern
 
 @url_prefix(r"/stock")
 class Clawl_hot_stock_Handler(tornado.web.RequestHandler):

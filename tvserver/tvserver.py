@@ -5,9 +5,13 @@ import tornado.web
 
 from tornado.options import define, options
 
-from test.login import url_pattern
-from test.index import url_pattern
-from test.crawl import url_pattern
+#from test.login import url_pattern
+#from test.index import url_pattern
+#from test.crawl import url_pattern
+import test.login
+import test.index
+import test.crawl
+from test.utils import url_pattern
 
 print url_pattern
 
