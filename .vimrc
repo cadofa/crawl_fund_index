@@ -5,6 +5,7 @@ autocmd FileType python setlocal foldmethod=indent
 set foldlevel=99
 set nu
 set hlsearch
+hi Search term=standout ctermfg=0 ctermbg=3
 set tags=tags;/
 filetype plugin on
 set ts=4
