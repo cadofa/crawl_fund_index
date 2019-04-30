@@ -44,3 +44,10 @@ let g:neocomplete#sources#syntax#min_keyword_length = 1
 let g:neocomplete#enable_auto_select = 0
 let g:neocomplete#enable_insert_char_pre = 1
 let g:SuperTabDefaultCompletionType="context"
+if has("autocmd")
+    autocmd BufRead *.txt set tw=78
+    autocmd BufReadPost *
+    \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+    \   exe "normal g'\"" |
+    \ endif
+endif
