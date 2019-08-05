@@ -85,8 +85,8 @@ def create_mail_content(fund_data, type_name):
     for f in fund_data[:38]:
         content_list.append(f[0])
         if u"国泰" in f[0]:
-            gt_best_fund_set.add(f[0])
-        best_average_fund_set.add(f[0])
+            gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
+        best_average_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
     average_content = average_content_title + '\n'.join(content_list)
 
     variance_content_title = type_name + u'方差靠前基金:\n'
@@ -96,14 +96,16 @@ def create_mail_content(fund_data, type_name):
     for f in fund_data[:38]:
         content_list.append(f[0])
         if u"国泰" in f[0]:
-            gt_best_fund_set.add(f[0])
-        best_variance_fund_set.add(f[0])
+            gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
+        best_variance_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
     variance_content = variance_content_title + '\n'.join(content_list)
 
     best_fund_set = best_average_fund_set.intersection(best_variance_fund_set)
     best_fund_set.update(gt_best_fund_set)
     best_fund_title = type_name + 'Best Fund:\n'
-    best_content = best_fund_title + '\n'.join(best_fund_set)
+    best_fund_list = list(best_fund_set)
+    best_fund_list.sort(key=lambda x: int(x.split()[3]))
+    best_content = best_fund_title + '\n'.join(best_fund_list)
     return '\n\n\n'.join([average_content,
                           variance_content,
                           best_content])
