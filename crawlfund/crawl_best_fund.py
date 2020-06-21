@@ -137,14 +137,14 @@ if __name__ == '__main__':
         response_dict = crawl_data(url)
         fund_data = Computing_rankings(response_dict, weights_list)
         mail_content = create_mail_content(fund_data, type_name)
-        print "\n***************fund text******************\n"
+        print "***************fund text******************"
         print mail_content
         fund_data = Computing_rankings(response_dict, weights_l_tw)
         mail_content = create_mail_content(fund_data, type_name)
-        print "\n***************fund text******************\n"
+        print "\n***************fund text******************"
         print mail_content
         fund_data = Computing_rankings(response_dict, weights_l_th)
         mail_content = create_mail_content(fund_data, type_name)
-        print "\n***************fund text******************\n"
+        print "\n***************fund text******************"
         print mail_content
 
