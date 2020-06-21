@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 
 code_name_list = ['F003N_FUND33', 'F008', 'F009', 'F011', 'F015N_FUND33', 'F012']
 weights_list =   [ 1,              0.9,    0.8,    0.7,    0.6,            0.5]
+weights_l_tw =   [ 0.5,            0.6,    0.7,    0.8,    0.9,            1]
+weights_l_th =   [ 1,              1,      1,      1,      1,              1]
 
 def sort_dict(response_dict, key_to_sort):
     sorted_dict= sorted(response_dict.items(), key=lambda d:d[1][key_to_sort], reverse = True)
@@ -38,7 +40,7 @@ def crawl_data(url):
     global code_name_list
 
     rs = requests.get(url)
-    print "***************fund text******************"
+    #print "***************fund text******************"
     response_str = rs.text[2:-1].replace("null", "'null'")
     response_dict = eval("{}".format(response_str))
     response_dict = response_dict['data']['data']
@@ -59,7 +61,7 @@ def crawl_data(url):
     return response_dict
 
 
-def Computing_rankings(response_dict):
+def Computing_rankings(response_dict, weights_list):
     global code_name_list
     fund_data = list()
     for k, v in response_dict.items():
@@ -106,9 +108,7 @@ def create_mail_content(fund_data, type_name):
     best_fund_list = list(best_fund_set)
     best_fund_list.sort(key=lambda x: int(x.split()[3]))
     best_content = best_fund_title + '\n'.join(best_fund_list)
-    return '\n\n\n'.join([average_content,
-                          variance_content,
-                          best_content])
+    return '\n\n\n'.join([best_content])
 
 
 if __name__ == '__main__':
@@ -135,7 +135,16 @@ if __name__ == '__main__':
             url = ('http://fund.ijijin.cn/data/Net/info/'
                    'bbx_F008_desc_0_0_1_9999_0_0_0_jsonp_g.html')
         response_dict = crawl_data(url)
-        fund_data = Computing_rankings(response_dict)
+        fund_data = Computing_rankings(response_dict, weights_list)
         mail_content = create_mail_content(fund_data, type_name)
+        print "\n***************fund text******************\n"
+        print mail_content
+        fund_data = Computing_rankings(response_dict, weights_l_tw)
+        mail_content = create_mail_content(fund_data, type_name)
+        print "\n***************fund text******************\n"
+        print mail_content
+        fund_data = Computing_rankings(response_dict, weights_l_th)
+        mail_content = create_mail_content(fund_data, type_name)
+        print "\n***************fund text******************\n"
         print mail_content
 
