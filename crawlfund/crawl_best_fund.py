@@ -14,6 +14,8 @@ weights_list =   [ 1,              0.9,    0.8,    0.7,    0.6,            0.5]
 weights_l_tw =   [ 0.5,            0.6,    0.7,    0.8,    0.9,            1]
 weights_l_th =   [ 1,              1,      1,      1,      1,              1]
 
+result_sort_index = 40
+
 def sort_dict(response_dict, key_to_sort):
     sorted_dict= sorted(response_dict.items(), key=lambda d:d[1][key_to_sort], reverse = True)
     rank = 1
@@ -84,7 +86,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[1])
     best_average_fund_set = set()
     content_list = list()
-    for f in fund_data[:38]:
+    for f in fund_data[:result_sort_index]:
         content_list.append(f[0])
         if u"国泰" in f[0]:
             gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
@@ -95,7 +97,7 @@ def create_mail_content(fund_data, type_name):
     fund_data.sort(key=lambda x: x[2])
     best_variance_fund_set = set()
     content_list = list()
-    for f in fund_data[:38]:
+    for f in fund_data[:result_sort_index]:
         content_list.append(f[0])
         if u"国泰" in f[0]:
             gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
