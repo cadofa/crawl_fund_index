@@ -14,7 +14,6 @@ weights_list =   [ 1,              0.9,    0.8,    0.7,    0.6,            0.5]
 weights_l_tw =   [ 0.5,            0.6,    0.7,    0.8,    0.9,            1]
 weights_l_th =   [ 1,              1,      1,      1,      1,              1]
 
-#index_number = 40
 
 def sort_dict(response_dict, key_to_sort):
     sorted_dict= sorted(response_dict.items(), key=lambda d:d[1][key_to_sort], reverse = True)
@@ -42,7 +41,6 @@ def crawl_data(url):
     global code_name_list
 
     rs = requests.get(url)
-    #print "***************fund text******************"
     response_str = rs.text[2:-1].replace("null", "'null'")
     response_dict = eval("{}".format(response_str))
     response_dict = response_dict['data']['data']
@@ -80,7 +78,6 @@ def Computing_rankings(response_dict, weights_list):
 
 
 def create_mail_content(fund_data, type_name):
-    gt_best_fund_set = set()
 
     average_content_title = type_name + u'排名靠前基金:\n'
     fund_data.sort(key=lambda x: x[1])
@@ -88,8 +85,6 @@ def create_mail_content(fund_data, type_name):
     content_list = list()
     for f in fund_data[:index_number]:
         content_list.append(f[0])
-        if u"国泰" in f[0]:
-            gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
         best_average_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
     average_content = average_content_title + '\n'.join(content_list)
 
@@ -99,14 +94,10 @@ def create_mail_content(fund_data, type_name):
     content_list = list()
     for f in fund_data[:index_number]:
         content_list.append(f[0])
-        if u"国泰" in f[0]:
-            gt_best_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
         best_variance_fund_set.add("  ".join([f[0], str(f[1]), str(f[2])]))
     variance_content = variance_content_title + '\n'.join(content_list)
 
     best_fund_set = best_average_fund_set.intersection(best_variance_fund_set)
-    best_fund_set.update(gt_best_fund_set)
-    #best_fund_title = type_name + 'Best Fund:\n'
     best_fund_list = list(best_fund_set)
     best_fund_list.sort(key=lambda x: int(x.split()[3]))
     best_content = '\n'.join(best_fund_list)
@@ -171,19 +162,19 @@ if __name__ == '__main__':
         response_dict = crawl_data(url)
         fund_data = Computing_rankings(response_dict, weights_list)
         mail_content = create_mail_content(fund_data, type_name)
-        print "******************%s FUND******************" % type_name
+        print "******************%s fund******************" % type_name
         print mail_content
         code_name_one, code_name_one_dict = get_code_name(mail_content)
         
         fund_data = Computing_rankings(response_dict, weights_l_tw)
         mail_content = create_mail_content(fund_data, type_name)
-        print "\n******************%s FUND******************" % type_name
+        print "\n******************%s fund******************" % type_name
         print mail_content
         code_name_two, code_name_two_dict = get_code_name(mail_content)
         
         fund_data = Computing_rankings(response_dict, weights_l_th)
         mail_content = create_mail_content(fund_data, type_name)
-        print "\n******************%s FUND******************" % type_name
+        print "\n******************%s fund******************" % type_name
         print mail_content
         code_name_three, code_name_three_dict = get_code_name(mail_content)
         
