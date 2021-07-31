@@ -32,7 +32,13 @@ def sort_dict(response_dict, key_to_sort):
 def handle_fund_name(response_dict):
     for s in response_dict:
         ss = response_dict[s]['name'].encode('utf8')
-        x = json.loads('{"foo":"%s"}' % ss)
+
+        try:
+            x = json.loads('{"foo":"%s"}' % ss)
+        except ValueError, e:
+            print s,"    ", ss
+            ss = "Unknown Fund"
+            x = json.loads('{"foo":"%s"}' % ss)
         response_dict[s]['name'] = x['foo']
 
     return response_dict
